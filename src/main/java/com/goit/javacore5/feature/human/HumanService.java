@@ -9,27 +9,28 @@ import java.time.LocalDate;
 
 public class HumanService {
     private Storage storage;
+    private Statement statement;
 
-    public HumanService(Storage storage) {
+    public HumanService(Storage storage) throws SQLException {
         this.storage = storage;
+
+        statement = storage.getConnection().createStatement();
     }
 
-    public void printHumanInfo(long id) {
-        try (Statement st = storage.getConnection().createStatement()) {
-            String sql = "SELECT name, birthday FROM human WHERE id = " + id;
+    public String getHumanInfo(long id) {
+        String sql = "SELECT name, birthday FROM human WHERE id = " + id;
 
-            try(ResultSet rs = st.executeQuery(sql)) {
-                if (rs.next()) {
-                    String name = rs.getString("name");
-                    String birthday = rs.getString("birthday");
+        try(ResultSet rs = statement.executeQuery(sql)) {
+            if (rs.next()) {
+                String name = rs.getString("name");
+                String birthday = rs.getString("birthday");
 
-                    System.out.println("name: " + name + ", birthday: " + birthday);
-                } else {
-                    System.out.println("Human with id " + id + " not found!");
-                }
+                return "name: " + name + ", birthday: " + birthday;
+            } else {
+                return null;
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        } catch (Exception ex) {
+            return null;
         }
     }
 
