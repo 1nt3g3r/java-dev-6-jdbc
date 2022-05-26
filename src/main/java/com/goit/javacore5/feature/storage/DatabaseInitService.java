@@ -1,24 +1,17 @@
 package com.goit.javacore5.feature.storage;
 
 import com.goit.javacore5.feature.prefs.Prefs;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import org.flywaydb.core.Flyway;
 
 public class DatabaseInitService {
-    public void initDb(Storage storage) {
-        try {
-            String initDbFilename = new Prefs().getString(Prefs.INIT_DB_SQL_FILE_PATH);
+    public void initDb(String connectionUrl) {
+        // Create the Flyway instance and point it to the database
+        Flyway flyway = Flyway
+                .configure()
+                .dataSource(connectionUrl, null, null)
+                .load();
 
-            String sql = String.join(
-                    "\n",
-                    Files.readAllLines(Paths.get(initDbFilename))
-            );
-
-            storage.executeUpdate(sql);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Start the migration
+        flyway.migrate();
     }
 }
